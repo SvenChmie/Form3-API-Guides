@@ -1,7 +1,6 @@
 # Guide: Making a Payment
 
-(Note: Do you want it to say "Business Case: Send money from a customer account" here somewhere?)
-(Note: Are there any specific steps required for different payment schemes (SWIFT etc.)? Do the steps in this guide work the same for any scheme? Should be mentioned somehow)
+_(Note: Are there any specific steps required for different payment schemes (SWIFT etc.)? Do the steps in this guide work the same for any scheme? Should be mentioned somehow)_
 
 In this guide you will learn how to use the Form3 Payments API to make a payment. The guide covers the following steps:
 - Send the payment

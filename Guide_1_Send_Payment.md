@@ -18,7 +18,7 @@ Before you start, make sure you have the following things ready to go:
 
 As a first step, you need to obtain a bearer token using your API credentials. This token will be used to authenticate yourself to the Form3 server.
 
-**_(Note: Should we elaborate on how to do that?)**_
+**_(Note: Should we elaborate on how to do that?)_**
 
 ## Create the Payment
 
@@ -77,7 +77,7 @@ Another way of tracking your payment is to use subscriptions. You can subscribe 
 
 The Form3 API supports [Amazon SQS](https://aws.amazon.com/sqs/) and webhook URLs to notify subscribers when an event occurs.
 
-**_(Note: I've used Slate syntax here. We'll use Slate to display this guide, right?)_**
+**_(Note: I've used Slate HTML syntax below, although you can't see it on GitHub, because they strips it before displaying. We'll use Slate to display this guide, right?)_**
 
 <aside class="notice">
 Using Amazon SQS is recommended, as it is a managed, highly-available solution and less error-prone than webhooks. For the sake of simplicity, however, this guide uses a webhook to demonstrate the subscription API.</aside>
@@ -86,13 +86,13 @@ Using Amazon SQS is recommended, as it is a managed, highly-available solution a
 
 In order to subscribe to an event via webhook, you need to provide the API with a callback URL. This needs to be a public URL that the API can call and notify you whenever the event has occured.
 
-####Using ngrok to create a public URL
+### Using ngrok to create a public URL
 
 The easiest way to set up a public URL for testing is to use [ngrok](https://ngrok.com/). With ngrok you can create a tunnel to expose a webserver running on your local machine to the public Internet. Follow the steps in the [ngrok documentation](https://ngrok.com/docs/2) to set up the tunnel.
 
 _**(Note: This doesn't contain any information about the type of server that has to run on the localhost. Should we provide any info on that?)**_
 
-#### Create the Subscription Resource
+### Create the Subscription Resource
 
 ```json
 Subscription Resource Example Code here!

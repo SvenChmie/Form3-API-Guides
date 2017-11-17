@@ -7,18 +7,35 @@ In this guide you will learn how to use the Form3 Payments API to make a payment
 - Track the payment progress manually
 - Track the payment progress automatically using subscriptions
 
+Each step is illustrated with Python code snippets, so you can execute each step as you read along. The snippets are ready-to-run programs and work in Python's interactive console.
+
 ## Prerequisites:
 Before you start, make sure you have the following things ready to go:
 - API credentials. Contact your Form3 contact to obtain your credentials. _**(Note: Better name for this role? Who do they have to contact?)**_
 - Register your bank ID and BIC with Form3
 - Sign up for Form3's scheme simulator. This is a sandbox environment that you can use to simulate transactions in order to test your application. _**(Note: in the API this is called "payment simulator". Which term should we use?)**_
+- If you want to run the Python code snippets, make sure you have [Python 2.7](https://www.python.org/downloads/) installed. You also need the requests package. The easiest way is to install it through [Pip](https://docs.python.org/2.7/installing/index.html): `pip install requests`
 
 
 ## Get a Bearer Token
 
-As a first step, you need to obtain a bearer token using your API credentials. This token will be used to authenticate yourself to the Form3 server.
+```python
+import requests
 
-**_(Note: Should we elaborate on how to do that?)_**
+# Please make sure to fill in your personal client ID and your client secret before running this snippet!
+client_id = 'YOUR CLIENT ID GOES HERE'
+client_secret = 'YOUR CLIENT SECRET GOES HERE'
+
+payload = "grant_type=client_credentials"
+base_url = 'https://api.tabla.env.form3.tech/v1'
+headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+auth_request = requests.auth.HTTPBasicAuth(client_id, client_secret)
+
+request = requests.request('post', base_url + '/oauth2/token', data=payload, auth=auth_request, headers=headers)
+print request.content
+```
+
+As a first step, you need to obtain a bearer token using your client ID and your client secret. This token will be used in the other API calls to authenticate yourself to the Form3 server.
 
 ## Create the Payment
 
@@ -66,6 +83,8 @@ _**(Question: Should Audits be mentioned here? Since it said in the email that a
 There are several ways to monitor your payment and track it on its way through the system. The easiest one is to query the submission resource that you created above:
 
 `GET /transaction/payments/{payment_id}/submissions/{submission_id}`
+
+Note that the submission resource is identified using the `payment_id` and the `submissions_id`.
 
 The response contains the current status of the payment in an attribute called `status`. If the payment has been successful, the status attribute says `delivery_confirmed`. Failed payments are denoted with a status attribute value `delivery_failed`. In this case, the attribute `status_reason` contains further information about why the payment failed. 
 

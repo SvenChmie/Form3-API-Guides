@@ -96,10 +96,10 @@ Another way of tracking your payment is to use subscriptions. You can subscribe 
 
 The Form3 API supports [Amazon SQS](https://aws.amazon.com/sqs/) and webhook URLs to notify subscribers when an event occurs.
 
-**_(Note: I've used Slate HTML syntax below, although you can't see it on GitHub, because they strips it before displaying. We'll use Slate to display this guide, right?)_**
+**_(Note: I've used Slate HTML syntax below, although you can't see it on GitHub because they strip the HTML before displaying. We'll use Slate to display this guide, right?)_**
 
 <aside class="notice">
-Using Amazon SQS is recommended, as it is a managed, highly-available solution and less error-prone than webhooks. For the sake of simplicity, however, this guide uses a webhook to demonstrate the subscription API.</aside>
+Using Amazon SQS is recommended, since it is a managed, highly-available solution and less error-prone than webhooks. For the sake of simplicity, however, this guide uses a webhook to demonstrate the subscription API.</aside>
 
 ### Create a Subscription using Webhooks
 

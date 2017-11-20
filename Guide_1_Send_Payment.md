@@ -1,19 +1,17 @@
 # Guide: Making a Payment
 
-_**(Note: Are there any specific steps required for different payment schemes (SWIFT etc.)? Do the steps in this guide work the same for any scheme? Should be mentioned somehow)**_
-
-In this guide you will learn how to use the Form3 Payments API to make a payment. The guide covers the following steps:
-- Send the payment
-- Track the payment progress manually
-- Track the payment progress automatically using subscriptions
+In this guide you will learn how to use the Form3 Payments API to make a payment through Faster Payments Service (FPS). The guide covers the following steps:
+- Sending the payment
+- Tracking the payment progress manually
+- Tracking the payment progress automatically using subscriptions
 
 Each step is illustrated with Python code snippets, so you can execute each step as you read along. The snippets are ready-to-run programs and work in Python's interactive console.
 
 ## Prerequisites:
 Before you start, make sure you have the following things ready to go:
-- API credentials. Contact your Form3 contact to obtain your credentials. _**(Note: Better name for this role? Who do they have to contact?)**_
-- Register your bank ID and BIC with Form3
-- Sign up for Form3's scheme simulator. This is a sandbox environment that you can use to simulate transactions in order to test your application. _**(Note: in the API this is called "payment simulator". Which term should we use?)**_
+- API credentials. Contact Form3 to obtain your credentials.
+- Register your UK sortcodes and BICs with Form3.
+- Sign up for Form3's scheme simulator for FPS payments. This is a sandbox environment that you can use to simulate transactions in order to test your application.
 - If you want to run the Python code snippets, make sure you have [Python 2.7](https://www.python.org/downloads/) installed. You also need the requests package. The easiest way is to install it through [Pip](https://docs.python.org/2.7/installing/index.html): `pip install requests`
 
 
@@ -22,17 +20,19 @@ Before you start, make sure you have the following things ready to go:
 ```python
 import requests
 
-# Please make sure to fill in your personal client ID and your client secret before running this snippet!
-client_id = 'YOUR CLIENT ID GOES HERE'
-client_secret = 'YOUR CLIENT SECRET GOES HERE'
+### Replace these variables with your own data! ###
+client_id = 'YOUR CLIENT ID HERE'
+client_secret = 'YOUR CLIENT SECRET HERE'
 
-payload = "grant_type=client_credentials"
-base_url = 'https://api.tabla.env.form3.tech/v1'
-headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+auth_payload = "grant_type=client_credentials"
+auth_url = 'https://api.tabla.env.form3.tech/v1/oauth2/token'
+auth_headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 auth_request = requests.auth.HTTPBasicAuth(client_id, client_secret)
 
-request = requests.request('post', base_url + '/oauth2/token', data=payload, auth=auth_request, headers=headers)
-print request.content
+auth = requests.request('post', auth_url, data=auth_payload, auth=auth_request, headers=auth_headers)
+print(auth.content)
+
+print("Bearer token: %s" % auth.json().get('access_token'))
 ```
 
 As a first step, you need to obtain a bearer token using your client ID and your client secret. This token will be used in the other API calls to authenticate yourself to the Form3 server.
@@ -43,8 +43,68 @@ To make a payment, you need to complete two steps. First create a payment resour
 
 ### Create the Payment Resource
 
-```json
-Code for payment resource creation here!
+```python
+import math, random, requests
+
+### Replace these variables with your own data! ###
+auth_token = 'A VALID BEARER TOKEN HERE'
+organisation_id = 'YOUR ORGANISATION ID HERE'
+bank_id = 'YOUR UK SORTCODE HERE'
+bank_id_code = 'YOUR BIC HERE'
+
+# Generate IDs
+payment_id = uuid.uuid4()
+print("Payment ID: %s" % payment_id)
+
+scheme_transaction_id = str(int(math.floor((1 + random.random()) * 100000000000000000)))
+payment_url = "https://api.tabla.env.form3.tech/v1/transaction/payments"
+payment_payload = """
+{
+    "data": {
+        "type": "payments",
+        "id": "%s",
+        "version": 0,
+        "organisation_id": "%s",
+        "attributes": {
+            "amount": "13.00",
+            "beneficiary_party": {
+                "account_name": "Mrs Receiving Test",
+                "account_number": "71268996",
+                "account_number_code": "BBAN",
+                "account_with": {
+                    "bank_id": "400302",
+                    "bank_id_code": "GBDSC"
+                }
+            },
+            "currency": "GBP",
+            "debtor_party": {
+                "account_name": "Mr Sending Test",
+                "account_number": "87654321",
+                "account_number_code": "BBAN",
+                "account_with": {
+                    "bank_id": "%s",
+                    "bank_id_code": "%s"
+                }
+            },
+            "scheme_transaction_id": "%s",
+            "processing_date": "%s",
+            "reference": "Something",
+            "scheme_payment_sub_type": "TelephoneBanking",
+            "scheme_payment_type": "ImmediatePayment"
+        }
+    }
+}
+""" % (payment_id, organisation_id, bank_id, bank_id_code, scheme_transaction_id, time.strftime("%Y-%m-%d"))
+
+payment_headers = {
+    'authorization': "bearer " + auth_token,
+    'accept': "application/json",
+    'content-type': "application/json",
+    'cache-control': "no-cache"
+    }
+
+payment = requests.request("POST", payment_url, data=payment_payload, headers=payment_headers)
+print(payment.text)
 ```
 
 Create a payment resource for the payment you are going to send. It contains all information required to process the payment. 
@@ -58,7 +118,9 @@ The key parameters that you need to provide are:
 
 #### Debtor and Beneficiary Data
 
-To identify the sending and receiving parties of the payment, you need to provide an `account_name`, the `account_number`, the `account_number_code`, as well as the `bank_id` and `bank_id_code` for the bank the account is registered with.
+To identify the sending and receiving parties of the payment, you need to provide an `account_name`, the `account_number`, the `account_number_code`, as well as the `bank_id` and `bank_id_code` for the bank the account is registered with. 
+
+In this example, use your UK sortcode for the sending party's `bank_id`. For the sending party's `bank_id_code`, use your BIC.
 
 Upon success, the call returns with a payment ID that you'll need below to send the payment.
 
@@ -68,8 +130,40 @@ A detailed description of each field of the payment resource is available in the
 
 ### Create the Submission Resource
 
-```json
-Code for submission resource here!
+```python
+import requests
+
+### Replace these variables with your own data! ###
+auth_token = 'A VALID BEARER TOKEN HERE'
+organisation_id = 'YOUR ORGANISATION ID HERE'
+payment_id = 'A VALID PAYMENT ID HERE'
+
+# Generate IDs
+submission_id = uuid.uuid4()
+print("Submission ID: %s" % submission_id)
+
+submission_url = "https://api.tabla.env.form3.tech/v1/transaction/payments/%s/submissions" % payment_id
+submission_payload = """
+{
+	"data": {
+		"id": "%s",
+		"type": "paymentsubmissions",
+		"organisation_id": "%s"
+	}
+}
+""" % (submission_id, organisation_id)
+
+submission_headers = {
+    'authorization': "bearer %s" % auth_token,
+    'accept': "application/json",
+    'content-type': "application/json",
+    'cache-control': "no-cache",
+    'postman-token': "f09ad285-4223-ef05-0d4c-bc1048546a82"
+    }
+
+submission = requests.request("POST", submission_url, data=submission_payload, headers=submission_headers)
+
+print(submission.text)
 ```
 
 The next step is to send the payment by creating a payment submission resource. Note that you have to provide the payment ID in the call.
@@ -78,7 +172,27 @@ And just like that, your payment is on its way!
 
 ## Track the Payment Manually
 
-_**(Question: Should Audits be mentioned here? Since it said in the email that audits are not recommended and this is a getting started guide, maybe it's more straightforward and less confusing not to mention it?)**_
+```python
+import requests
+
+### Replace these variables with your own data! ###
+auth_token = 'A VALID BEARER TOKEN HERE'
+payment_id = 'A VALID PAYMENT ID HERE'
+submission_id = 'A VALID SUBMISSION ID HERE'
+
+get_subm_url = "https://api.tabla.env.form3.tech/v1/transaction/payments/%s/submissions/%s" % (payment_id, submission_id)
+get_subm_headers = {
+    'authorization': "bearer %s" % auth_token,
+    'cache-control': "no-cache",
+    'postman-token': "ab4adba7-f0fb-4707-d1e1-437ea32d81a8"
+    }
+
+get_subm = requests.request("GET", get_subm_url, headers=get_subm_headers)
+
+print(get_subm.text)
+```
+
+
 
 There are several ways to monitor your payment and track it on its way through the system. The easiest one is to query the submission resource that you created above:
 
@@ -96,8 +210,6 @@ Another way of tracking your payment is to use subscriptions. You can subscribe 
 
 The Form3 API supports [Amazon SQS](https://aws.amazon.com/sqs/) and webhook URLs to notify subscribers when an event occurs.
 
-**_(Note: I've used Slate HTML syntax below, although you can't see it on GitHub because they strip the HTML before displaying. We'll use Slate to display this guide, right?)_**
-
 <aside class="notice">
 Using Amazon SQS is recommended, since it is a managed, highly-available solution and less error-prone than webhooks. For the sake of simplicity, however, this guide uses a webhook to demonstrate the subscription API.</aside>
 
@@ -105,32 +217,67 @@ Using Amazon SQS is recommended, since it is a managed, highly-available solutio
 
 In order to subscribe to an event via webhook, you need to provide the API with a callback URL. This needs to be a public URL that the API can call and notify you whenever the event has occured.
 
-### Using ngrok to create a public URL
+### Using RequestBin to create a public URL
 
-The easiest way to set up a public URL for testing is to use [ngrok](https://ngrok.com/). With ngrok you can create a tunnel to expose a webserver running on your local machine to the public Internet. Follow the steps in the [ngrok documentation](https://ngrok.com/docs/2) to set up the tunnel.
-
-_**(Note: This doesn't contain any information about the type of server that has to run on the localhost. Should we provide any info on that?)**_
+The easiest way to set up a public URL for testing is to use [RequestBin](https://requestb.in). With RequestBin you can set up a public URL and see inspect the calls that are made to it. On the RequestBin website, simply click the "Create a RequestBin" button. Your public callback URL is displayed at the top right of the page.
 
 ### Create the Subscription Resource
 
-```json
-Subscription Resource Example Code here!
+```python
+import requests
+
+### Replace these variables with your own data! ###
+auth_token = 'A VALID BEARER TOKEN HERE'
+organisation_id = 'YOUR ORGANISATION ID HERE'
+callback_url = 'YOUR CALLBACK URL HERE'
+
+# Generate IDs
+subscription_id = uuid.uuid4()
+print("Subscription ID: %s" % subscription_id)
+
+subscription_url = "https://api.tabla.env.form3.tech/v1/notification/subscriptions"
+subscription_payload = """
+{
+	"data": {
+		"type": "subscriptions",
+		"id": "%s",
+		"organisation_id": "%s",
+		"attributes": {
+			"callback_uri": "%s",
+			"callback_transport": "http",
+			"event_type": "updated",
+			"record_type": "payment_submissions"
+		}
+	}
+}
+""" % (subscription_id, organisation_id, callback_url)
+
+subscription_headers = {
+    'authorization': "bearer %s" % auth_token,
+    'accept': "application/json",
+    'content-type': "application/json",
+    'cache-control': "no-cache",
+    'postman-token': "02efa25f-26cb-df8e-ca44-7a6d4051a023"
+    }
+
+subscription = requests.request("POST", subscription_url, data=subscription_payload, headers=subscription_headers)
+print(subscription.text)
 ```
 
 To subscribe to an event, create a subscription resource. To be notified through a webhook, choose `callback_transport` to be `http`. The parameter `callback_uri` needs to contain your ngrok URL.
 
-The attribute `record_type` contains the type of event you want to subscribe to. In this case, choose `PaymentSubmission`. 
+The attribute `record_type` contains the type of event you want to subscribe to. In this case, choose `payment_submissions`. 
 
-A full list of event types is available in the API documentation. **_(Note: Where? I couldn't find one...)_**
+A full list of event types is available in the [API documentation](http://draft-api-docs.form3.tech/?http#payment-events).
 
-To test the webhook, create another subscription resource. If everything is set up correctly, the webhook will trigger your local server and notify you about the payment.
-
-That's it, you now know how to make a payment using the Form3 Payments API. Continue to the next guide to learn how to receive a payment. 
+To test the webhook, repeat the steps of creating a payment and a submission resource. Visit the RequestBin page to see the callbacks to your URL. If everything worked, the message body will contain `"status":"delivery_confirmed"`.
 
 
 
+## Track a Resource a Resource using Audits
+
+_**Intro to audits here**_
 
 
 
-
-
+That's it, you now know how to make a payment using the Form3 Payments API. Continue to the next guide to learn how to receive a payment.

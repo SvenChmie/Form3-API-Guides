@@ -1,12 +1,11 @@
 import math, random, requests, time, uuid
 
 ### Replace these variables with your own data! ###
-client_id = 'f3944d06-895d-46b2-b38f-dc964040c52e'
-client_secret = '7fded4a95c624a6b8c0c354f2574af16'
-organisation_id = '2d6b9c73-e7a0-4442-bda9-2b326e6f4ffd'
-bank_id = '100200'
-bank_id_code = 'GBDSC'
-callback_url = "https://requestb.in/1irexov1"
+client_id = 'YOUR CLIENT ID HERE'
+client_secret = 'YOUR CLIENT SECRET HERE'
+organisation_id = 'YOUR ORGANISATION ID HERE'
+bank_id = 'YOUR BANK ID HERE'
+callback_url = "YOUR CALLBACK URL HERE"
 
 ### Generate IDs for all calls ###
 subscription_id = uuid.uuid4()
@@ -89,7 +88,7 @@ payment_payload = """
 				"account_number_code": "BBAN",
 				"account_with": {
 					"bank_id": "%s",
-					"bank_id_code": "%s"
+					"bank_id_code": "GBDSC"
 				}
 			},
 			"scheme_transaction_id": "%s",
@@ -100,7 +99,7 @@ payment_payload = """
 		}
 	}
 }
-""" % (payment_id, organisation_id, bank_id, bank_id_code, scheme_transaction_id, time.strftime("%Y-%m-%d"))
+""" % (payment_id, organisation_id, bank_id, scheme_transaction_id, time.strftime("%Y-%m-%d"))
 
 payment_headers = {
     'authorization': "bearer " + auth_token,

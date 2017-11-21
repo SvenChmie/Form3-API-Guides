@@ -16,6 +16,7 @@ print("Payment ID: %s" % payment_id)
 print("Subscription ID: %s" % subscription_id)
 print("Submission ID: %s" % submission_id)
 
+base_url = 'https://api.test.form3.tech'
 
 ### Authenticate ###
 auth_payload = "grant_type=client_credentials"
@@ -30,7 +31,7 @@ auth_token = auth.json().get('access_token')
 print("Bearer token: %s" % auth_token)
 
 ### Create Payment Submission Subscription ###
-subscription_url = "https://api.tabla.env.form3.tech/v1/notification/subscriptions"
+subscription_url = "%s/v1/notification/subscriptions" % base_url
 
 subscription_payload = """
 {
@@ -62,7 +63,7 @@ print(subscription.text)
 
 ### Creating Payment Resource ###
 scheme_transaction_id = str(int(math.floor((1 + random.random()) * 100000000000000000)))
-payment_url = "https://api.tabla.env.form3.tech/v1/transaction/payments"
+payment_url = "%s/v1/transaction/payments" % base_url
 payment_payload = """
 {
 	"data": {
@@ -113,7 +114,7 @@ payment = requests.request("POST", payment_url, data=payment_payload, headers=pa
 print(payment.text)
 
 ### Creating Submission ###
-submission_url = "https://api.tabla.env.form3.tech/v1/transaction/payments/%s/submissions" % payment_id
+submission_url = "%s/v1/transaction/payments/%s/submissions" % (base_url, payment_id)
 
 submission_payload = """
 {
@@ -139,7 +140,7 @@ print(submission.text)
 
 
 ### Query submission resource ###
-get_subm_url = "https://api.tabla.env.form3.tech/v1/transaction/payments/%s/submissions/%s" % (payment_id, submission_id)
+get_subm_url = "%s/v1/transaction/payments/%s/submissions/%s" % (base_url, payment_id, submission_id)
 
 get_subm_headers = {
     'authorization': "bearer %s" % auth_token,
@@ -153,7 +154,7 @@ print(get_subm.text)
 
 
 ### Clean Up Subscription ###
-del_subm_url = "https://api.tabla.env.form3.tech/v1/notification/subscriptions/%s" % subscription_id
+del_subm_url = "%s/v1/notification/subscriptions/%s" % (base_url, subscription_id)
 
 querystring = {"version":"0"}
 
@@ -165,6 +166,6 @@ del_subm_headers = {
     'postman-token': "c155066c-0869-8947-aa37-c8fbe281fb96"
     }
 
-# del_subm = requests.request("DELETE", del_subm_url, headers=del_subm_headers, params=querystring)
+del_subm = requests.request("DELETE", del_subm_url, headers=del_subm_headers, params=querystring)
 
-# print(del_subm.text)
+print(del_subm.text)

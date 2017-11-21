@@ -25,7 +25,7 @@ client_id = 'YOUR CLIENT ID HERE'
 client_secret = 'YOUR CLIENT SECRET HERE'
 
 auth_payload = "grant_type=client_credentials"
-auth_url = 'https://api.tabla.env.form3.tech/v1/oauth2/token'
+auth_url = 'https://api.test.form3.tech/v1/oauth2/token'
 auth_headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 auth_request = requests.auth.HTTPBasicAuth(client_id, client_secret)
 
@@ -50,14 +50,13 @@ import math, random, requests
 auth_token = 'A VALID BEARER TOKEN HERE'
 organisation_id = 'YOUR ORGANISATION ID HERE'
 bank_id = 'YOUR UK SORTCODE HERE'
-bank_id_code = 'YOUR BIC HERE'
 
 # Generate IDs
 payment_id = uuid.uuid4()
 print("Payment ID: %s" % payment_id)
 
 scheme_transaction_id = str(int(math.floor((1 + random.random()) * 100000000000000000)))
-payment_url = "https://api.tabla.env.form3.tech/v1/transaction/payments"
+payment_url = "https://api.test.form3.tech/v1/transaction/payments"
 payment_payload = """
 {
     "data": {
@@ -83,7 +82,7 @@ payment_payload = """
                 "account_number_code": "BBAN",
                 "account_with": {
                     "bank_id": "%s",
-                    "bank_id_code": "%s"
+                    "bank_id_code": "GBDSC"
                 }
             },
             "scheme_transaction_id": "%s",
@@ -94,7 +93,7 @@ payment_payload = """
         }
     }
 }
-""" % (payment_id, organisation_id, bank_id, bank_id_code, scheme_transaction_id, time.strftime("%Y-%m-%d"))
+""" % (payment_id, organisation_id, bank_id, scheme_transaction_id, time.strftime("%Y-%m-%d"))
 
 payment_headers = {
     'authorization': "bearer " + auth_token,
@@ -120,7 +119,9 @@ The key parameters that you need to provide are:
 
 To identify the sending and receiving parties of the payment, you need to provide an `account_name`, the `account_number`, the `account_number_code`, as well as the `bank_id` and `bank_id_code` for the bank the account is registered with. 
 
-In this example, use your UK sortcode for the sending party's `bank_id`. For the sending party's `bank_id_code`, use your BIC.
+In this example, use your UK sortcode for the sending party's `bank_id`. 
+
+The `bank_id_code ` attribute denotes the type of the `bank_id`. Since only domestic UK accounts are used in this example, the `bank_id_code` is preset as `GBDSC`.
 
 Upon success, the call returns with a payment ID that you'll need below to send the payment.
 
@@ -142,7 +143,7 @@ payment_id = 'A VALID PAYMENT ID HERE'
 submission_id = uuid.uuid4()
 print("Submission ID: %s" % submission_id)
 
-submission_url = "https://api.tabla.env.form3.tech/v1/transaction/payments/%s/submissions" % payment_id
+submission_url = "https://api.test.form3.tech/v1/transaction/payments/%s/submissions" % payment_id
 submission_payload = """
 {
 	"data": {
@@ -180,7 +181,7 @@ auth_token = 'A VALID BEARER TOKEN HERE'
 payment_id = 'A VALID PAYMENT ID HERE'
 submission_id = 'A VALID SUBMISSION ID HERE'
 
-get_subm_url = "https://api.tabla.env.form3.tech/v1/transaction/payments/%s/submissions/%s" % (payment_id, submission_id)
+get_subm_url = "https://api.test.form3.tech/v1/transaction/payments/%s/submissions/%s" % (payment_id, submission_id)
 get_subm_headers = {
     'authorization': "bearer %s" % auth_token,
     'cache-control': "no-cache",
@@ -235,7 +236,7 @@ callback_url = 'YOUR CALLBACK URL HERE'
 subscription_id = uuid.uuid4()
 print("Subscription ID: %s" % subscription_id)
 
-subscription_url = "https://api.tabla.env.form3.tech/v1/notification/subscriptions"
+subscription_url = "https://api.test.form3.tech/v1/notification/subscriptions"
 subscription_payload = """
 {
 	"data": {

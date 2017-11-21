@@ -8,7 +8,7 @@ auth_token = 'A VALID BEARER TOKEN HERE'
 payment_id = 'A VALID PAYMENT ID HERE'
 submission_id = 'A VALID SUBMISSION ID HERE'
 
-get_subm_url = "https://api.tabla.env.form3.tech/v1/transaction/payments/%s/submissions/%s" % (payment_id, submission_id)
+get_subm_url = "https://api.test.form3.tech/v1/transaction/payments/%s/submissions/%s" % (payment_id, submission_id)
 get_subm_headers = {
     'authorization': "bearer %s" % auth_token,
     'cache-control': "no-cache",

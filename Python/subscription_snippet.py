@@ -12,7 +12,7 @@ callback_url = 'YOUR CALLBACK URL HERE'
 subscription_id = uuid.uuid4()
 print("Subscription ID: %s" % subscription_id)
 
-subscription_url = "https://api.tabla.env.form3.tech/v1/notification/subscriptions"
+subscription_url = "https://api.test.form3.tech/v1/notification/subscriptions"
 subscription_payload = """
 {
 	"data": {

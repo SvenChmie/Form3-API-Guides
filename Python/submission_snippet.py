@@ -12,7 +12,7 @@ payment_id = 'A VALID PAYMENT ID HERE'
 submission_id = uuid.uuid4()
 print("Submission ID: %s" % submission_id)
 
-submission_url = "https://api.tabla.env.form3.tech/v1/transaction/payments/%s/submissions" % payment_id
+submission_url = "https://api.test.form3.tech/v1/transaction/payments/%s/submissions" % payment_id
 submission_payload = """
 {
 	"data": {

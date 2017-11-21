@@ -7,14 +7,13 @@ import math, random, requests
 auth_token = 'A VALID BEARER TOKEN HERE'
 organisation_id = 'YOUR ORGANISATION ID HERE'
 bank_id = 'YOUR UK SORTCODE HERE'
-bank_id_code = 'YOUR BIC HERE'
 
 # Generate IDs
 payment_id = uuid.uuid4()
 print("Payment ID: %s" % payment_id)
 
 scheme_transaction_id = str(int(math.floor((1 + random.random()) * 100000000000000000)))
-payment_url = "https://api.tabla.env.form3.tech/v1/transaction/payments"
+payment_url = "https://api.test.form3.tech/v1/transaction/payments"
 payment_payload = """
 {
     "data": {
@@ -40,7 +39,7 @@ payment_payload = """
                 "account_number_code": "BBAN",
                 "account_with": {
                     "bank_id": "%s",
-                    "bank_id_code": "%s"
+                    "bank_id_code": "GBDSC"
                 }
             },
             "scheme_transaction_id": "%s",
@@ -51,7 +50,7 @@ payment_payload = """
         }
     }
 }
-""" % (payment_id, organisation_id, bank_id, bank_id_code, scheme_transaction_id, time.strftime("%Y-%m-%d"))
+""" % (payment_id, organisation_id, bank_id, scheme_transaction_id, time.strftime("%Y-%m-%d"))
 
 payment_headers = {
     'authorization': "bearer " + auth_token,

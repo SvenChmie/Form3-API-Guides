@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 ### Creating Payment Resource Snippet ###
 # Creates a payment resource for an UK FPS payment.
 
@@ -12,7 +15,6 @@ bank_id = 'YOUR UK SORTCODE HERE'
 payment_id = uuid.uuid4()
 print("Payment ID: %s" % payment_id)
 
-scheme_transaction_id = str(int(math.floor((1 + random.random()) * 100000000000000000)))
 payment_url = "https://api.test.form3.tech/v1/transaction/payments"
 payment_payload = """
 {
@@ -42,7 +44,6 @@ payment_payload = """
                     "bank_id_code": "GBDSC"
                 }
             },
-            "scheme_transaction_id": "%s",
             "processing_date": "%s",
             "reference": "Something",
             "scheme_payment_sub_type": "TelephoneBanking",
@@ -50,7 +51,7 @@ payment_payload = """
         }
     }
 }
-""" % (payment_id, organisation_id, bank_id, scheme_transaction_id, time.strftime("%Y-%m-%d"))
+""" % (payment_id, organisation_id, bank_id, time.strftime("%Y-%m-%d"))
 
 payment_headers = {
     'authorization': "bearer " + auth_token,

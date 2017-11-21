@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 ### Creating Submission Subscription Snippet
 # Creates a webhook subscription for payment submission
 

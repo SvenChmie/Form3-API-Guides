@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 #### Authentication Snippet ####
 # Obtains a bearer token.
 

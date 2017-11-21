@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 ### Creating Submission Resource Snippet ###
 # Submits a payment.
 

@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 ### Getting Submission Status Snippet
 # Get a submission resource to query the payment status.
 

@@ -17,6 +17,8 @@ Before you start, make sure you have the following things ready to go:
 
 ## Get a Bearer Token
 
+As a first step, you need to obtain a bearer token using your client ID and your client secret. This token will be used in the other API calls to authenticate yourself to the Form3 server.
+
 ```python
 import requests
 
@@ -35,13 +37,31 @@ print(auth.content)
 print("Bearer token: %s" % auth.json().get('access_token'))
 ```
 
-As a first step, you need to obtain a bearer token using your client ID and your client secret. This token will be used in the other API calls to authenticate yourself to the Form3 server.
-
 ## Create the Payment
 
 To make a payment, you need to complete two steps. First create a payment resource to define the payment parameters, then send it by creating a payment submission resource. This payment submission is also used later to track the status of your payment.
 
 ### Create the Payment Resource
+
+
+Create a payment resource for the payment you are going to send. It contains all information required to process the payment. 
+
+The key parameters that you need to provide are:
+
+- `amount`: The amount to be paid
+- `currency`: The currency code of the currency for the amount
+- `debtor` and `beneficiary`: Data structures containing the account information of the sending and the receiving party.
+
+
+#### Debtor and Beneficiary Data
+
+To identify the sending and receiving parties of the payment, you need to provide an `account_name`, the `account_number`, the `account_number_code`, as well as the `bank_id` and `bank_id_code` for the bank the account is registered with. 
+
+In this example, use your UK sortcode for the sending party's `bank_id`. 
+
+The `bank_id_code ` attribute denotes the type of the `bank_id`. Since only domestic UK accounts are used in this example, the `bank_id_code` is preset as `GBDSC`.
+
+A detailed description of each field of the payment resource is available in the [API documentation](http://draft-api-docs.form3.tech/?http#create92).
 
 ```python
 import math, random, requests
@@ -104,28 +124,9 @@ payment = requests.request("POST", payment_url, data=payment_payload, headers=pa
 print(payment.text)
 ```
 
-Create a payment resource for the payment you are going to send. It contains all information required to process the payment. 
-
-The key parameters that you need to provide are:
-
-- `amount`: The amount to be paid
-- `currency`: The currency code of the currency for the amount
-- `debtor` and `beneficiary`: Data structures containing the account information of the sending and the receiving party.
-
-
-#### Debtor and Beneficiary Data
-
-To identify the sending and receiving parties of the payment, you need to provide an `account_name`, the `account_number`, the `account_number_code`, as well as the `bank_id` and `bank_id_code` for the bank the account is registered with. 
-
-In this example, use your UK sortcode for the sending party's `bank_id`. 
-
-The `bank_id_code ` attribute denotes the type of the `bank_id`. Since only domestic UK accounts are used in this example, the `bank_id_code` is preset as `GBDSC`.
-
-A detailed description of each field of the payment resource is available in the [API documentation](http://draft-api-docs.form3.tech/?http#create92).
-
-
-
 ### Create the Submission Resource
+
+The next step is to send the payment by creating a payment submission resource. Note that you have to provide the payment ID in the call.
 
 ```python
 import requests
@@ -163,11 +164,19 @@ submission = requests.request("POST", submission_url, data=submission_payload, h
 print(submission.text)
 ```
 
-The next step is to send the payment by creating a payment submission resource. Note that you have to provide the payment ID in the call.
-
 And just like that, your payment is on its way!
 
 ## Track the Payment Manually
+
+There are several ways to monitor your payment and track it on its way through the system. The easiest one is to query the submission resource that you created above:
+
+`GET /transaction/payments/{payment_id}/submissions/{submission_id}`
+
+Note that the submission resource is identified using the `payment_id` and the `submissions_id`.
+
+The response contains the current status of the payment in an attribute called `status`. If the payment has been successful, the status attribute says `delivery_confirmed`. Failed payments are denoted with a status attribute value `delivery_failed`. In this case, the attribute `status_reason` contains further information about why the payment failed. 
+
+A detailed description of all possible values of the status attribute and their meaning is available in the [API documentation](http://draft-api-docs.form3.tech/?http#payment-submission-status).
 
 ```python
 import requests
@@ -189,18 +198,6 @@ get_subm = requests.request("GET", get_subm_url, headers=get_subm_headers)
 print(get_subm.text)
 ```
 
-
-
-There are several ways to monitor your payment and track it on its way through the system. The easiest one is to query the submission resource that you created above:
-
-`GET /transaction/payments/{payment_id}/submissions/{submission_id}`
-
-Note that the submission resource is identified using the `payment_id` and the `submissions_id`.
-
-The response contains the current status of the payment in an attribute called `status`. If the payment has been successful, the status attribute says `delivery_confirmed`. Failed payments are denoted with a status attribute value `delivery_failed`. In this case, the attribute `status_reason` contains further information about why the payment failed. 
-
-A detailed description of all possible values of the status attribute and their meaning is available in the [API documentation](http://draft-api-docs.form3.tech/?http#payment-submission-status).
-
 ## Track the Payment using Subscriptions
 
 Another way of tracking your payment is to use subscriptions. You can subscribe to certain events and automatically be notified when they occur. 
@@ -219,6 +216,13 @@ In order to subscribe to an event via webhook, you need to provide the API with 
 The easiest way to set up a public URL for testing is to use [RequestBin](https://requestb.in). With RequestBin you can set up a public URL and see inspect the calls that are made to it. On the RequestBin website, simply click the "Create a RequestBin" button. Your public callback URL is displayed at the top right of the page.
 
 ### Create the Subscription Resource
+
+
+To subscribe to an event, create a subscription resource. To be notified through a webhook, choose `callback_transport` to be `http`. The parameter `callback_uri` needs to contain your ngrok URL.
+
+The attribute `record_type` contains the type of event you want to subscribe to. In this case, choose `payment_submissions`. 
+
+A full list of event types is available in the [API documentation](http://draft-api-docs.form3.tech/?http#payment-events).
 
 ```python
 import requests
@@ -261,14 +265,7 @@ subscription = requests.request("POST", subscription_url, data=subscription_payl
 print(subscription.text)
 ```
 
-To subscribe to an event, create a subscription resource. To be notified through a webhook, choose `callback_transport` to be `http`. The parameter `callback_uri` needs to contain your ngrok URL.
-
-The attribute `record_type` contains the type of event you want to subscribe to. In this case, choose `payment_submissions`. 
-
-A full list of event types is available in the [API documentation](http://draft-api-docs.form3.tech/?http#payment-events).
-
 To test the webhook, repeat the steps of creating a payment and a submission resource. Visit the RequestBin page to see the callbacks to your URL. If everything worked, the message body will contain `"status":"delivery_confirmed"`.
-
 
 
 ## Track a Resource a Resource using Audits

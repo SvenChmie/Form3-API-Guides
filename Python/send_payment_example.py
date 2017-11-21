@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import math, random, requests, time, uuid
 
 ### Replace these variables with your own data! ###
@@ -61,7 +64,6 @@ print(subscription.text)
 
 
 ### Creating Payment Resource ###
-scheme_transaction_id = str(int(math.floor((1 + random.random()) * 100000000000000000)))
 payment_url = "%s/v1/transaction/payments" % base_url
 payment_payload = """
 {
@@ -91,7 +93,6 @@ payment_payload = """
 					"bank_id_code": "GBDSC"
 				}
 			},
-			"scheme_transaction_id": "%s",
 			"processing_date": "%s",
 			"reference": "Something",
 			"scheme_payment_sub_type": "TelephoneBanking",
@@ -99,7 +100,7 @@ payment_payload = """
 		}
 	}
 }
-""" % (payment_id, organisation_id, bank_id, scheme_transaction_id, time.strftime("%Y-%m-%d"))
+""" % (payment_id, organisation_id, bank_id, time.strftime("%Y-%m-%d"))
 
 payment_headers = {
     'authorization': "bearer " + auth_token,

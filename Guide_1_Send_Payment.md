@@ -9,7 +9,7 @@ Each step is illustrated with Python code snippets, so you can execute each step
 
 ## Prerequisites:
 Before you start, make sure you have the following things ready to go:
-- API credentials. Contact Form3 to obtain your credentials.
+- Your API credentials and an organisation ID. Contact Form3 to obtain them.
 - Register your UK sortcodes and BICs with Form3.
 - Sign up for Form3's scheme simulator for FPS payments. This is a sandbox environment that you can use to simulate transactions in order to test your application.
 - If you want to run the Python code snippets, make sure you have [Python 2.7](https://www.python.org/downloads/) installed. You also need the requests package. The easiest way is to install it through [Pip](https://docs.python.org/2.7/installing/index.html): `pip install requests`
@@ -55,7 +55,6 @@ bank_id = 'YOUR UK SORTCODE HERE'
 payment_id = uuid.uuid4()
 print("Payment ID: %s" % payment_id)
 
-scheme_transaction_id = str(int(math.floor((1 + random.random()) * 100000000000000000)))
 payment_url = "https://api.test.form3.tech/v1/transaction/payments"
 payment_payload = """
 {
@@ -85,7 +84,6 @@ payment_payload = """
                     "bank_id_code": "GBDSC"
                 }
             },
-            "scheme_transaction_id": "%s",
             "processing_date": "%s",
             "reference": "Something",
             "scheme_payment_sub_type": "TelephoneBanking",
@@ -93,7 +91,7 @@ payment_payload = """
         }
     }
 }
-""" % (payment_id, organisation_id, bank_id, scheme_transaction_id, time.strftime("%Y-%m-%d"))
+""" % (payment_id, organisation_id, bank_id, time.strftime("%Y-%m-%d"))
 
 payment_headers = {
     'authorization': "bearer " + auth_token,
@@ -122,8 +120,6 @@ To identify the sending and receiving parties of the payment, you need to provid
 In this example, use your UK sortcode for the sending party's `bank_id`. 
 
 The `bank_id_code ` attribute denotes the type of the `bank_id`. Since only domestic UK accounts are used in this example, the `bank_id_code` is preset as `GBDSC`.
-
-Upon success, the call returns with a payment ID that you'll need below to send the payment.
 
 A detailed description of each field of the payment resource is available in the [API documentation](http://draft-api-docs.form3.tech/?http#create92).
 

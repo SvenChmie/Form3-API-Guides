@@ -22,6 +22,7 @@ print("Submission ID: %s" % submission_id)
 base_url = 'https://api.test.form3.tech'
 
 ### Authenticate ###
+print("Getting bearer token...")
 auth_payload = "grant_type=client_credentials"
 auth_url = 'https://api.tabla.env.form3.tech/v1/oauth2/token'
 auth_headers = {'Content-Type': 'application/x-www-form-urlencoded'}
@@ -65,6 +66,7 @@ print(subscription.text)
 
 
 ### Creating Payment Resource ###
+print("Creating payment resource...")
 payment_url = "%s/v1/transaction/payments" % base_url
 payment_payload = """
 {
@@ -115,6 +117,7 @@ payment = requests.request("POST", payment_url, data=payment_payload, headers=pa
 print(payment.text)
 
 ### Creating Submission ###
+print("Creating submission resource...")
 submission_url = "%s/v1/transaction/payments/%s/submissions" % (base_url, payment_id)
 
 submission_payload = """
@@ -141,6 +144,7 @@ print(submission.text)
 
 
 ### Query submission resource ###
+print("Querying submission resource...")
 get_subm_url = "%s/v1/transaction/payments/%s/submissions/%s" % (base_url, payment_id, submission_id)
 
 get_subm_headers = {
@@ -155,6 +159,7 @@ print(get_subm.text)
 
 
 ### Query audit entries of submission resource ###
+print("Getting audit entries...")
 audit_url = "%s/v1/audit/entries/payment_submissions/%s" % (base_url, submission_id)
 
 audit_headers = {
@@ -167,6 +172,7 @@ pprint(audit.json())
 
 
 ### Clean Up Subscription ###
+print("Deleting callback subscription...")
 del_subm_url = "%s/v1/notification/subscriptions/%s" % (base_url, subscription_id)
 
 querystring = {"version":"0"}

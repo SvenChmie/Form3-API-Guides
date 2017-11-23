@@ -21,7 +21,7 @@ The sending party then submits the payment. The banking scheme performs several 
 
 
 
-![Sending_Payment_Diagram](/Sending_Payment_Diagram.JPG)
+![Sending_Payment_Diagram](/Images/Sending_Payment_Diagram.JPG)
 
 
 

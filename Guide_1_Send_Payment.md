@@ -270,7 +270,42 @@ To test the webhook, repeat the steps of creating a payment and a submission res
 
 ## Track a Resource a Resource using Audits
 
-_**Intro to audits here**_
+Another way to track your payment is using audits. Each time something happens in the system and a resource changes its state, an audit entry is created to document it. To monitor the status of an outgoing payment, the best resource to track is the submission resource that was created above to submit the payment:
+
+`GET /audit/entries/payment_submissions/{submission_id}`
+
+The response contains a number of `AuditEntry` elements. Each entry contains an `after_data` section with a `status` attribute. This attribute denotes the status of the resource after the event that the `AuditEntry` element describes.
+
+A typical successful payment goes through the following stages:
+
+- *accepted*
+- *validation_pending*
+- *limit_check_pending*
+- *released_to_gateway*
+- *delivery_confirmed*
+
+In case the processing of the payment resource fails at some point in the system, the status update trail would contain an error message and terminate with the status *delivery_failed*.
+
+A full list of statuses can be found in the [API documentation](http://draft-api-docs.form3.tech/))
+
+```python
+import requests
+from pprint import pprint
+
+### Replace these variables with your own data! ###
+auth_token = 'A VALID BEARER TOKEN HERE'
+submission_id = 'A VALID SUBMISSION ID HERE'
+
+audit_url = "https://api.test.form3.tech/v1/audit/entries/payment_submissions/%s" % submission_id
+
+audit_headers = {
+    'authorization': "bearer %s" % auth_token,
+    'cache-control': "no-cache"
+    }
+
+audit = requests.request("GET", audit_url, headers=audit_headers)
+pprint(audit.json())
+```
 
 
 

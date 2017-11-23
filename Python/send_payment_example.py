@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import math, random, requests, time, uuid
+from pprint import pprint
 
 ### Replace these variables with your own data! ###
 client_id = 'YOUR CLIENT ID HERE'
@@ -151,6 +152,18 @@ get_subm_headers = {
 get_subm = requests.request("GET", get_subm_url, headers=get_subm_headers)
 
 print(get_subm.text)
+
+
+### Query audit entries of submission resource ###
+audit_url = "%s/v1/audit/entries/payment_submissions/%s" % (base_url, submission_id)
+
+audit_headers = {
+    'authorization': "bearer %s" % auth_token,
+    'cache-control': "no-cache"
+    }
+
+audit = requests.request("GET", audit_url, headers=audit_headers)
+pprint(audit.json())
 
 
 ### Clean Up Subscription ###

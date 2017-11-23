@@ -7,7 +7,25 @@ In this guide you will learn how to use the Form3 Payments API to make a payment
 
 Each step is illustrated with Python code snippets, so you can execute each step as you read along. The snippets are ready-to-run programs and work in Python's interactive console.
 
-## Prerequisites:
+## Introduction
+
+Before diving into the implementation, let's have a quick look at what it means to send a payment from one bank account to another.
+
+A transfer of funds usually requires a bank and an account with that bank on the sender side, as well as the receiving side.
+
+The sending bank and the receiving bank are identified using a bank ID. The format of this ID depends on the country the bank is registered in. In the UK it is a 6-digit number that denotes the bank and the branch of the bank. The account is identified by the account number. 
+
+To make a payment, the sending party creates a payment resource that specifies all important information about the payment: who sends it, who receives it, the amount, the currency, and so forth.
+
+The sending party then submits the payment. The banking scheme performs several steps of validation and routes the payment to the receiving party. On its way through the system, the status of the payment submission changes until its delivery is either acknowledged or declined by the receiving bank.
+
+
+
+![Sending_Payment_Diagram](/Sending_Payment_Diagram.JPG)
+
+
+
+## Prerequisites
 Before you start, make sure you have the following things ready to go:
 - Your API credentials and an organisation ID. Contact Form3 to obtain them.
 - Register your UK sortcodes and BICs with Form3.

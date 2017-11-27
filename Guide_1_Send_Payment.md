@@ -37,6 +37,8 @@ Before you start, make sure you have the following things ready to go:
 
 As a first step, you need to obtain a bearer token using your client ID and your client secret. This token will be used in the other API calls to authenticate yourself to the Form3 server.
 
+> Fetch the bearer token for authentication
+
 ```python
 import requests
 
@@ -80,6 +82,8 @@ In this example, use your UK sortcode for the sending party's `bank_id`.
 The `bank_id_code ` attribute denotes the type of the `bank_id`. Since only domestic UK accounts are used in this example, the `bank_id_code` is preset as `GBDSC`.
 
 A detailed description of each field of the payment resource is available in the [API documentation](http://draft-api-docs.form3.tech/?http#create92).
+
+> Create the payment
 
 ```python
 import math, random, requests
@@ -146,6 +150,8 @@ print(payment.text)
 
 The next step is to send the payment by creating a payment submission resource. Note that you have to provide the payment ID in the call.
 
+> Submit the payment
+
 ```python
 import requests
 
@@ -196,6 +202,8 @@ The response contains the current status of the payment in an attribute called `
 
 A detailed description of all possible values of the status attribute and their meaning is available in the [API documentation](http://draft-api-docs.form3.tech/?http#payment-submission-status).
 
+> Track the payment submission status
+
 ```python
 import requests
 
@@ -241,6 +249,8 @@ To subscribe to an event, create a subscription resource. To be notified through
 The attribute `record_type` contains the type of event you want to subscribe to. In this case, choose `payment_submissions`. 
 
 A full list of event types is available in the [API documentation](http://draft-api-docs.form3.tech/?http#payment-events).
+
+> Create a Webhook Subscription
 
 ```python
 import requests
@@ -305,6 +315,8 @@ A typical successful payment goes through the following stages:
 In case the processing of the payment resource fails at some point in the system, the status update trail would contain an error message and terminate with the status *delivery_failed*.
 
 A full list of statuses can be found in the [API documentation](http://draft-api-docs.form3.tech/))
+
+> Query the audit trail
 
 ```python
 import requests

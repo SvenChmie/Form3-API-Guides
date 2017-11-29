@@ -4,7 +4,7 @@
 ### Creating Payment Resource Snippet ###
 # Creates a payment resource for an UK FPS payment.
 
-import math, random, requests
+import math, uuid, random, requests
 
 ### Replace these variables with your own data! ###
 auth_token = 'A VALID BEARER TOKEN HERE'

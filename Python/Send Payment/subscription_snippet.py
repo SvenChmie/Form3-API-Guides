@@ -4,7 +4,7 @@
 ### Creating Submission Subscription Snippet
 # Creates a webhook subscription for payment submission
 
-import requests
+import uuid, requests
 
 ### Replace these variables with your own data! ###
 auth_token = 'A VALID BEARER TOKEN HERE'
@@ -37,7 +37,6 @@ subscription_headers = {
     'accept': "application/json",
     'content-type': "application/json",
     'cache-control': "no-cache",
-    'postman-token': "02efa25f-26cb-df8e-ca44-7a6d4051a023"
     }
 
 subscription = requests.request("POST", subscription_url, data=subscription_payload, headers=subscription_headers)

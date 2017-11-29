@@ -4,7 +4,7 @@
 ### Creating Submission Resource Snippet ###
 # Submits a payment.
 
-import requests
+import uuid, requests
 
 ### Replace these variables with your own data! ###
 auth_token = 'A VALID BEARER TOKEN HERE'
@@ -31,7 +31,6 @@ submission_headers = {
     'accept': "application/json",
     'content-type': "application/json",
     'cache-control': "no-cache",
-    'postman-token': "f09ad285-4223-ef05-0d4c-bc1048546a82"
     }
 
 submission = requests.request("POST", submission_url, data=submission_payload, headers=submission_headers)

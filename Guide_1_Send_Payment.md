@@ -82,12 +82,20 @@ In this example, use your UK sortcode for the sending party's `bank_id`.
 
 The `bank_id_code ` attribute denotes the type of the `bank_id`. Since only domestic UK accounts are used in this example, the `bank_id_code` is preset as `GBDSC`.
 
-A detailed description of each field of the payment resource is available in the [API documentation](http://draft-api-docs.form3.tech/?http#create92).
+A detailed description of each field of the payment resource is available in the [API documentation](/api.html#payments-resource).
+
+<aside class="notice">You can use the scheme simulator to test how your application handles both successful and failed payments:
+
+- Sending a payment with an amount of `200.00` will trigger an accepted outbound payment (assuming that all other necessary configurations are correct).
+- A payment with an amount of `216.16` will trigger a rejected outbound payment.
+
+See the [API documentation]() for a complete list of trigger amounts and the connected events.
+</aside>
 
 > Create the payment
 
 ```python
-import math, uuid, random, requests
+import math, random, requests
 
 ### Replace these variables with your own data! ###
 auth_token = 'A VALID BEARER TOKEN HERE'
@@ -156,7 +164,7 @@ And just like that, your payment is on its way!
 > Submit the payment
 
 ```python
-import uuid, requests
+import requests
 
 ### Replace these variables with your own data! ###
 auth_token = 'A VALID BEARER TOKEN HERE'
@@ -201,7 +209,7 @@ Note that the submission resource is identified using the `payment_id` and the `
 
 The response contains the current status of the payment in an attribute called `status`. If the payment has been successful, the status attribute says `delivery_confirmed`. Failed payments are denoted with a status attribute value `delivery_failed`. In this case, the attribute `status_reason` contains further information about why the payment failed.
 
-A detailed description of all possible values of the status attribute and their meaning is available in the [API documentation](http://draft-api-docs.form3.tech/?http#payment-submission-status).
+A detailed description of all possible values of the status attribute and their meaning is available in the [API documentation](/api.html#payment-submission-status).
 
 > Track the payment submission status
 
@@ -248,14 +256,14 @@ To subscribe to an event, create a subscription resource. To be notified through
 
 The attribute `record_type` contains the type of event you want to subscribe to. In this case, choose `payment_submissions`.
 
-A full list of event types is available in the [API documentation](http://draft-api-docs.form3.tech/?http#payment-events).
+A full list of event types is available in the [API documentation](/api.html#payment-events).
 
 To test the webhook, repeat the steps of creating a payment and a submission resource. Visit the RequestBin page to see the callbacks to your URL. If everything worked, the message body will contain `"status":"delivery_confirmed"`.
 
 > Create a Webhook Subscription
 
 ```python
-import uuid, requests
+import requests
 
 ### Replace these variables with your own data! ###
 auth_token = 'A VALID BEARER TOKEN HERE'
@@ -313,7 +321,7 @@ A typical successful payment goes through the following stages:
 
 In case the processing of the payment resource fails at some point in the system, the status update trail would contain an error message and terminate with the status *delivery_failed*.
 
-A full list of statuses can be found in the [API documentation](/api.html))
+A full list of statuses can be found in the [API documentation](/api.html).
 
 > Query the audit trail
 

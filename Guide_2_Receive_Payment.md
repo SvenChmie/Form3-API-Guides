@@ -24,7 +24,7 @@ A payment admission resource is created when the payment reaches the receiving s
 
 If the payment admission was successful and the funds have been added to the beneficiary bank account, the receiving bank sends an acknowledge message to the sending bank and the transfer is complete.
 
-**picture here**
+![Receiving_Payment_Diagram](Images\Receiving_Payment_Diagram.JPG)
 
 
 
@@ -70,11 +70,17 @@ To receive a payment on a bank account, that account needs to be registered with
 - A `bank_id` and `bank_id_code`. For the Faster Payments Service (FPS), the `bank_id` is a 6-digit number and the code is `GBDSC`.
 - The bank's BIC code. You need to register your `bic` with Form3 before you can create an account.
 - The country and base currency. Since FPS is a domestic scheme, the country is `GB` and the currency is `GBP`. 
-- A customer ID. **what requirements does the customer ID have to satisfy??**
+- A customer ID. This attribute does not have form constraints.
 
 <aside class="notice">A different option to create an account is to enable **automatic account creation**. In that case, an account resource is automatically created when an inbound payment arrives with an unknown account number. Contact Form3 to see if automatic account creation can be enabled for your company.</aside>
 
 ```python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+### Creating Account Snippet ###
+# Creates an account.
+
 import uuid, requests
 
 ### Replace these variables with your own data! ###
@@ -82,6 +88,7 @@ auth_token = 'A VALID BEARER TOKEN HERE'
 organisation_id = 'YOUR ORGANISATION ID HERE'
 bank_id = 'YOUR UK SORTCODE HERE'
 bic = 'YOUR BIC HERE'
+account_number = 'A VALID ACCOUNT NUMBER HERE'
 customer_id =  'A VALID CUSTOMER ID HERE'
 
 # Generate IDs
@@ -102,11 +109,12 @@ acc_payload = """
 			"bic": "%s",
 			"country": "GB",
 			"base_currency": "GBP",
+			"account_number": "%s",
 			"customer_id": "%s"
 		}
 	}
 }
-""" % (acc_id, organisation_id, bank_id, bic, customer_id)
+""" % (acc_id, organisation_id, bank_id, bic, account_number, customer_id)
 
 acc_headers = {
     'authorization': "bearer %s" % auth_token
@@ -140,9 +148,9 @@ The easiest way to set up a public URL for testing is to use [RequestBin](https:
 
 To subscribe to an event, create a subscription resource. To be notified through a webhook, choose `callback_transport` to be `http`. The parameter `callback_uri` needs to contain your callback URL.
 
-The attribute `record_type` contains the type of event you want to subscribe to. To track admissions of inbound payments, choose `payment_admissions`.
+The `event_type` attribute denotes the type of event. For this example, it should set to `created`, since your are listening for the creation of a resource. The attribute `record_type` contains the resource you want to subscribe to. To track admissions of inbound payments, choose `payment_admissions`.
 
-A full list of event types is available in the [API documentation](http://draft-api-docs.form3.tech/api.html#payment-events).
+A full list of event types and resource names is available in the [API documentation](/api.html#payment-events).
 
 ```python
 import uuid, requests
@@ -166,7 +174,7 @@ subscription_payload = """
 		"attributes": {
 			"callback_uri": "%s",
 			"callback_transport": "http",
-			"event_type": "updated",
+			"event_type": "created",
 			"record_type": "payment_admissions"
 		}
 	}
@@ -186,9 +194,107 @@ print(subscription.text)
 
 ## Trigger an Inbound Payment
 
-stuff
+For learning and testing purposes, an inbound to an account can be triggered using the scheme simulator. Sending an outbound payment with an `amount` of 600.00 through the simulator will trigger an immediate inbound payment with the same amount back to sending account.
+
+To create an outbound payment, first create a payment resource and then a submission resource to send the payment. See our[ Send a Payment tutorial](???) for details how to create these resources.
+
+For the debtor party of the outgoing payment, use the account you created above by specifying the `account_number`, and your `bank_id`. The `account_name` parameter is required, but can be any name you like. 
+
+The `account_number_code` and `bank_id_code` are fixed due to the payment scheme that is used in this example.
+
+```python
+import uuid, requests, time
+
+### Replace these variables with your own data! ###
+auth_token = 'A VALID BEARER TOKEN HERE'
+organisation_id = 'YOUR ORGANISATION ID HERE'
+bank_id = 'YOUR UK SORTCODE HERE'
+account_number = 'A VALID ACCOUNT NUMBER HERE'
+
+# Generate IDs
+payment_id = uuid.uuid4()
+submission_id = uuid.uuid4()
+print("Payment ID: %s" % payment_id)
+print("Submission ID: %s" % submission_id)
+
+# Base URL
+base_url = "https://api.test.form3.tech/v1"
+
+# Create Payment
+payment_url = "%s/transaction/payments" % base_url
+payment_payload = """
+{
+    "data": {
+        "type": "payments",
+        "id": "%s",
+        "version": 0,
+        "organisation_id": "%s",
+        "attributes": {
+            "amount": "600.00",
+            "beneficiary_party": {
+                "account_name": "Mrs Receiving Test",
+                "account_number": "71268996",
+                "account_number_code": "BBAN",
+                "account_with": {
+                    "bank_id": "400302",
+                    "bank_id_code": "GBDSC"
+                }
+            },
+            "currency": "GBP",
+            "debtor_party": {
+                "account_name": "Mr Sending Test",
+                "account_number": "%s",
+                "account_number_code": "BBAN",
+                "account_with": {
+                    "bank_id": "%s",
+                    "bank_id_code": "GBDSC"
+                }
+            },
+            "processing_date": "%s",
+            "reference": "Something",
+            "scheme_payment_sub_type": "TelephoneBanking",
+            "scheme_payment_type": "ImmediatePayment"
+        }
+    }
+}
+""" % (payment_id, organisation_id, account_number, bank_id, time.strftime("%Y-%m-%d"))
+
+headers = {
+    'authorization': "bearer " + auth_token,
+    'accept': "application/json",
+    'content-type': "application/json",
+    'cache-control': "no-cache"
+    }
+
+payment = requests.request("POST", payment_url, data=payment_payload, headers=headers)
+print(payment.text)
+
+# Create Submission
+submission_url = "%s/transaction/payments/%s/submissions" % (base_url, payment_id)
+submission_payload = """
+{
+    "data": {
+        "id": "%s",
+        "type": "paymentsubmissions",
+        "organisation_id": "%s"
+    }
+}
+""" % (submission_id, organisation_id)
+
+submission = requests.request("POST", submission_url, data=submission_payload, headers=headers)
+
+print(submission.text)
+```
+
+
 
 ## Track the Payment Admission
 
-stuff
+The outbound payment has triggered an immediate inbound payment to the debtor account of the outgoing payment.
+
+Take a look at your RequestBin that you used earlier to subscribe to the creation of payment admission resources. You should see a notification for a new admission resource. Scroll through the payload to find the `status` attribute. If everything worked, it says `confirmed`, while the `status_reason` has the value `accepted`.
+
+That's it, you have successfully received a payment and tracked it using the Form3 Payments API.
+
+
 

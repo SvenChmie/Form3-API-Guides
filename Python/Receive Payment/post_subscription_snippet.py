@@ -25,7 +25,7 @@ subscription_payload = """
 		"attributes": {
 			"callback_uri": "%s",
 			"callback_transport": "http",
-			"event_type": "updated",
+			"event_type": "created",
 			"record_type": "payment_admissions"
 		}
 	}

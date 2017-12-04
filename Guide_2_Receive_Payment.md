@@ -117,7 +117,7 @@ acc_payload = """
 """ % (acc_id, organisation_id, bank_id, bic, account_number, customer_id)
 
 acc_headers = {
-    'authorization': "bearer %s" % auth_token
+    'authorization': "bearer %s" % auth_token,
     'content-type': "application/json",
     'cache-control': "no-cache",
     }

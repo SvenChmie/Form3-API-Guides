@@ -24,7 +24,7 @@ base_url = 'https://api.test.form3.tech'
 ### Authenticate ###
 print("Getting bearer token...")
 auth_payload = "grant_type=client_credentials"
-auth_url = 'https://api.tabla.env.form3.tech/v1/oauth2/token'
+auth_url = '%s/v1/oauth2/token' % base_url
 auth_headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 auth_request = requests.auth.HTTPBasicAuth(client_id, client_secret)
 
